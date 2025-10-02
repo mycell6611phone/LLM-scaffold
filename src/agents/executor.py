@@ -12,10 +12,25 @@ class Executor:
         self.llm, self.tools, self.sp, self.cfg = llm, tools, sp, cfg
 
     async def run_step(self, step: Step, budget_calls: int = 4):
-        context = {"scratchpad_tail": self.sp.short_context(6), "step": step.description}
+        context_payload = {
+            "objective": step.inputs.get("objective"),
+            "requirements": step.inputs.get("requirements"),
+            "dependencies": step.inputs.get("dependencies"),
+            "artifacts": step.inputs.get("artifacts"),
+            "context": step.inputs.get("context"),
+        }
         calls = 0
-        history = [{"role":"system","content": EXEC_SYS},
-                   {"role":"user","content": f"Step: {step.description}\nContext: {context}"}]
+        history = [
+            {"role": "system", "content": EXEC_SYS},
+            {
+                "role": "user",
+                "content": (
+                    f"Task: {step.description}\n"
+                    f"Inputs: {context_payload}\n"
+                    "Respond with concise actions. Use FINAL when satisfied."
+                ),
+            },
+        ]
         result = ""
         while calls < budget_calls:
             out = await self.llm.chat(history, temperature=0.5, max_tokens=self.cfg.max_step_tokens, model=self.cfg.model_executor or self.cfg.model)
@@ -35,4 +50,5 @@ class Executor:
                 continue
             result = str(out)
             break
+        self.sp.append({"type": "result", "step": step.description, "result": result})
         return result

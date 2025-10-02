@@ -4,6 +4,7 @@ import json
 class Scratchpad:
     def __init__(self, path: Path):
         self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
 
     def append(self, obj: dict):
         line = json.dumps(obj, ensure_ascii=False)
@@ -28,3 +29,8 @@ class Scratchpad:
     def short_context(self, limit=8):
         items = self.read_all()[-limit:]
         return items
+
+    @property
+    def location(self) -> str:
+        """Return the on-disk location for reference in summaries."""
+        return str(self.path)

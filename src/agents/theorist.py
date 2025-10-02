@@ -11,8 +11,22 @@ class Theorist:
         self.llm, self.tools, self.sp, self.cfg = llm, tools, sp, cfg
 
     async def run_step(self, step: Step, budget_calls: int = 4):
-        history = [{"role":"system","content": THEO_SYS},
-                   {"role":"user","content": f"Think about: {step.description}\nRecent: {self.sp.short_context(6)}"}]
+        payload = {
+            "objective": step.inputs.get("objective"),
+            "requirements": step.inputs.get("requirements"),
+            "context": step.inputs.get("context"),
+        }
+        history = [
+            {"role": "system", "content": THEO_SYS},
+            {
+                "role": "user",
+                "content": (
+                    f"Question: {step.description}\n"
+                    f"Inputs: {payload}\n"
+                    "Respond with a short synthesis and cite key unknowns."
+                ),
+            },
+        ]
         calls = 0
         result = ""
         while calls < budget_calls:
@@ -27,6 +41,7 @@ class Theorist:
                 continue
             result = out if not act else act.get("content","")
             break
+        self.sp.append({"type": "result", "step": step.description, "result": result})
         return result
 
     async def review(self, step: Step, output: str):

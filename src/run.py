@@ -1,11 +1,11 @@
-import asyncio, os, time, pathlib, json
+import asyncio, time, pathlib
 from dotenv import load_dotenv
 from src.core.config import Config
 from src.core.scratchpad import Scratchpad
 from src.core.llm import OpenAICompat
 from src.core.tools import Toolbelt
 from src.core.memory import Memory
-from src.core.task_graph import Plan
+from src.core.task_graph import Plan, Step
 from src.agents.orchestrator import Orchestrator
 from src.agents.executor import Executor
 from src.agents.theorist import Theorist
@@ -37,7 +37,7 @@ async def main(prompt: str):
 
     pathlib.Path(cfg.workdir).mkdir(parents=True, exist_ok=True)
 
-    sp = Scratchpad(run_dir / "scratchpad.jsonl")
+    orch_sp = Scratchpad(run_dir / "orchestrator" / "scratchpad.jsonl")
     llm = OpenAICompat(cfg)
 
     # ─── quick bypass ───────────────────────────────────────────
@@ -46,27 +46,48 @@ async def main(prompt: str):
         print(f"[BYPASS ANSWER]\n{bypass}")
         return
 
-    tools = Toolbelt(cfg, sp, run_dir)
+    tools = Toolbelt(cfg, orch_sp, run_dir / "orchestrator")
     mem = Memory(run_dir, persist_dir="data/memory")  # use your new memory backend
 
     # ─── Orchestrator & agents ──────────────────────────────────
-    orch = Orchestrator(llm, tools, sp, mem, cfg)
+    agent_names = ["executor", "theorist", "critic", "refiner"]
+    agent_sps = {name: Scratchpad(run_dir / name / "scratchpad.jsonl") for name in agent_names}
+    agent_tools = {name: Toolbelt(cfg, agent_sps[name], run_dir / name) for name in agent_names}
+
+    orch = Orchestrator(llm, tools, orch_sp, mem, cfg)
     agents = {
-        "executor": Executor(llm, tools, sp, cfg),
-        "theorist": Theorist(llm, tools, sp, cfg),
-        "critic": Critic(llm, tools, sp, cfg),
-        "refiner": Refiner(llm, tools, sp, cfg),
+        "executor": Executor(llm, agent_tools["executor"], agent_sps["executor"], cfg),
+        "theorist": Theorist(llm, agent_tools["theorist"], agent_sps["theorist"], cfg),
+        "critic": Critic(llm, agent_tools["critic"], agent_sps["critic"], cfg, mem),
+        "refiner": Refiner(llm, agent_tools["refiner"], agent_sps["refiner"], cfg),
     }
 
     # ─── run orchestrator loop ──────────────────────────────────
     plan: Plan = await orch.run_loop(prompt, agents)
-    sp.append({"type": "plan", "plan": plan.model_dump()})
+    orch_sp.append({"type": "plan", "plan": plan.model_dump()})
+
+    # ─── final synthesis ────────────────────────────────────────
+    final_step = Step(description="Synthesize final deliverable", agent="refiner")
+    if orch.last_context and orch.last_context[-1].get("agent") == "refiner":
+        refined_output = orch.last_context[-1].get("result", "")
+    else:
+        refined_output = await agents["refiner"].run_step(
+            final_step,
+            context=orch.last_context.copy(),
+            objective=prompt,
+            plan=plan,
+        )
+        orch.last_context.append(
+            {"description": final_step.description, "agent": "refiner", "result": refined_output}
+        )
+    sp.append({"type": "final", "result": refined_output})
 
     # ─── persist & output ───────────────────────────────────────
-    await mem.store_run(prompt, plan, sp)
-    final_out = sp.short_context(1)  # grab the last entry (refiner usually)
+
+    await mem.store_run(prompt, plan, orch_sp)
+    final_out = orch_sp.short_context(1)  # grab the last entry (refiner usually)
     out_path = run_dir / "final.txt"
-    out_path.write_text(json.dumps(final_out, indent=2), encoding="utf-8")
+    out_path.write_text(refined_output.strip() + "\n", encoding="utf-8")
     print(f"[DONE] Wrote {out_path}")
 
 
