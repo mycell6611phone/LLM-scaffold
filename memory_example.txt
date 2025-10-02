@@ -1,0 +1,124 @@
+  def evaluate(
+        self, candidate: CandidateMemory, opponent_reasoning: str | None = None
+    ) -> Tuple[str, str]:
+        system_prompt = get_self_improvement_system_prompt(self.name, self.mood)
+        messages = [{"role": "system", "content": system_prompt}]
+
+        user_content = (
+            "Here is a candidate memory for your future training:\n---\n"
+            f"{candidate.content}\n---"
+        )
+        if opponent_reasoning:
+            user_content += (
+                f"\n\nYour peer model has argued: \"{opponent_reasoning}\"\n"
+                "Consider their reasoning carefully. Be willing to revise your own stance if they make a good point."
+            )
+        messages.append({"role": "user", "content": user_content})
+
+        logging.info(f"{self.name} evaluating Candidate {candidate.id}.")
+        print(f"\n=== {self.name} evaluating Candidate {candidate.id} ===")
+        print(f"{candidate.content[:80]}…")
+
+        try:
+            llm_text = self._post_chat(messages)
+            logging.info(f"{self.name} raw content:\n{llm_text}\n")
+
+            decision = "UNKNOWN"
+            justification = "parse-error"
+            for line in (l.strip() for l in llm_text.split("\n") if l.strip()):
+                if line.upper().startswith("DECISION:"):
+                    token = line.split(":", 1)[1].strip().upper()
+                    if "ACCEPT" in token:
+                        decision = "ACCEPT"
+                    elif "REJECT" in token:
+                        decision = "REJECT"
+                elif line.upper().startswith("JUSTIFICATION:"):
+                    justification = line.split(":", 1)[1].strip()
+
+            if decision == "UNKNOWN":
+                m = re.search(r"DECISION\s*:\s*(ACCEPT|REJECT)", llm_text, re.I)
+                if m:
+                    decision = m.group(1).upper()
+            if justification == "parse-error":
+                m = re.search(r"JUSTIFICATION\s*:\s*(.*)", llm_text, re.I | re.S)
+                if m:
+                    justification = m.group(1).strip()
+            if not justification:
+                justification = llm_text
+
+            print(f"Decision: {decision}\nJustification: {justification}\n")
+            return decision, justification
+
+        except requests.RequestException as exc:
+            logging.error(f"HTTP error for {self.name}: {exc}")
+            return "ERROR", f"HTTP call failed: {exc}"
+        except Exception as exc:
+            logging.error(f"General error: {exc}")
+            return "ERROR", f"Local failure: {exc}"
+
+
+# ---------------------------------------------------------------------
+# Debate engine that seeks consensus
+# ---------------------------------------------------------------------
+class DebateConsensusEngine:
+    def __init__(
+        self, model_a: ModelInterface, model_b: ModelInterface, max_rounds: int = 3
+    ):
+        self.model_a = model_a
+        self.model_b = model_b
+        self.max_rounds = max_rounds
+
+    def debate_candidate(self, candidate: CandidateMemory) -> str:
+        print(f"\n--- Debate for Candidate {candidate.id} ---")
+        round_count = 0
+
+        while round_count < self.max_rounds:
+            if round_count == 0:
+                dec_a, just_a = self.model_a.evaluate(candidate)
+                dec_b, just_b = self.model_b.evaluate(candidate)
+            else:
+                dec_a, just_a = self.model_a.evaluate(candidate, just_b)
+                dec_b, just_b = self.model_b.evaluate(candidate, just_a)
+
+            candidate.debate_log.append(
+                {
+                    "round": round_count + 1,
+                    "model_a_decision": dec_a,
+                    "model_a_justification": just_a,
+                    "model_b_decision": dec_b,
+                    "model_b_justification": just_b,
+                }
+            )
+
+            print(f"Round {round_count + 1}: A={dec_a}, B={dec_b}")
+            if dec_a == dec_b and dec_a in {"ACCEPT", "REJECT"}:
+                candidate.status = "ACCEPTED" if dec_a == "ACCEPT" else "REJECTED"
+                print(f"*** Consensus: {candidate.status} ***")
+                return candidate.status
+            if "ERROR" in {dec_a, dec_b}:
+                candidate.status = "ERROR_DEBATE"
+                return candidate.status
+
+            round_count += 1
+
+        candidate.status = "RETAINED"
+        print("*** No consensus, candidate retained. ***")
+        return candidate.status
+
+    def run(self, pool: List[CandidateMemory]):
+            for cand in pool:
+                self.debate_candidate(cand)
+         
+            if cand.status == "ACCEPTED":
+                add_to_training_set(cand)
+                time.sleep(1)  # polite delay
+
+
+# ---------------------------------------------------------------------
+# Utility: append accepted memories
+# ---------------------------------------------------------------------
+def add_to_training_set(candidate: CandidateMemory):
+    with open("training_set.txt", "a", encoding="utf-8") as fh:
+        fh.write(f"{candidate.content}\n\n")
+
+
