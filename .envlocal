@@ -1,0 +1,12 @@
+BASE_URL=http://127.0.0.1:4891/v1
+MAX_TOOL_CALLS_PER_STEP=3
+MAX_STEP_TOKENS=2048
+# Allowed working directory for tools
+# per-agent routing
+MODEL_PLAN_ORCHESTRATOR=GPT-5
+MODEL_ORCHESTRATOR=Llama 3.1 8B Instruct 128k
+MODEL_THEORIST=Llama 3.1 8B Instruct 128k
+MODEL_CRITIC=Llama 3.1 8B Instruct 128k
+MODEL_REFINER=GPT-4.1
+MODEL_EXECUTOR=o4 mini
+WORKDIR=./workspace

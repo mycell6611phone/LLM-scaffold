@@ -1,0 +1,32 @@
+### Step-by-Step Plan to Explore the Workspace
+
+1. **Navigate to the project directory `~/desktop/vm_share`**
+   - Use the command: 
+     ```bash
+     cd ~/desktop/vm_share
+     ```
+
+2. **List all files in the current directory**
+   - Use the command:
+     ```bash
+     ls
+     ```
+   
+3. **Attempt to open a non-existent file (e.g., 'nonexistent.txt') and catch any errors**
+   - Use the following JavaScript code to attempt opening a non-existent file and handle potential errors:
+     <javascript_interpret>
+     ```javascript
+     try {
+         const fs = require('fs');
+         let data = fs.readFileSync('/home/sentinel/Desktop/vm_share/workspace/nonexistent.txt', 'utf8');
+         console.log(data);
+     } catch (err) {
+         if (err.code === 'ENOENT') {
+             console.error("The file does not exist.");
+         } else {
+             console.error(err.message);
+         }
+     }
+     ```
+     </javascript_interpret>
+

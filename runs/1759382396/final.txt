@@ -1,0 +1,6 @@
+```json
+{
+    "action": "final",
+    "content": "There seems to be an issue with the tools available. Please ensure that all necessary tools are properly installed and configured."
+}
+```

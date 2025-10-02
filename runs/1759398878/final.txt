@@ -1,0 +1,69 @@
+[
+  {
+    "type": "plan",
+    "plan": {
+      "steps": [
+        {
+          "description": "Run static code analysis tool on the project to identify errors and incomplete code.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Run static code analysis tool on the project to identify errors and incomplete code.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Review the output from the static code analysis tool for identified issues.",
+          "agent": "theorist",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Verify the configuration and documentation of the static code analysis tool to ensure the correct command format is being used.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Check for updates or patches for the static code analysis tool that may resolve compatibility issues.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Experiment with different command structures or parameters to identify a working invocation of the static code analysis tool.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Consult the tool's support or community forums for insights on the error and possible resolutions.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Consult the tool's support or community forums for insights on the error and possible resolutions.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Select a different static code analysis tool to use for inspection of the project.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Select a different static code analysis tool to use for inspection of the project.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        }
+      ]
+    }
+  }
+]

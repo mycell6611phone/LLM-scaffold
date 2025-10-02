@@ -1,0 +1,69 @@
+[
+  {
+    "type": "plan",
+    "plan": {
+      "steps": [
+        {
+          "description": "Collect all source code files from the project directory for analysis.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Analyze each collected source code file for syntax errors, incomplete code blocks, and structural breaks using static analysis tools and linters.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Analyze each collected source code file for logical errors, unhandled exceptions, and inconsistent or incomplete function implementations using static analysis and code review tools.",
+          "agent": "theorist",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Run pylint and flake8 on all collected source code files to detect logical errors, code smells, and style inconsistencies.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Review pylint and flake8 reports to identify logical errors, code smells, and style inconsistencies in the source code files.",
+          "agent": "critic",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Resolve pylint integration issues by verifying tool configuration and updating to compatible versions if necessary.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Re-run pylint and flake8 on all source code files after resolving integration issues to generate updated reports on logical errors, code smells, and style inconsistencies.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Review updated pylint and flake8 reports to identify logical errors, code smells, and style inconsistencies in the source code files.",
+          "agent": "critic",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Define and implement a robust automated unit testing framework for all source code files to catch logical errors and runtime issues.",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        },
+        {
+          "description": "Implement unit tests for each collected source code file, focusing on function correctness, edge cases, and exception handling using a standard testing framework (e.g., pytest).",
+          "agent": "executor",
+          "inputs": {},
+          "outputs": {}
+        }
+      ]
+    }
+  }
+]
