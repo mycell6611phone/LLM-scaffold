@@ -118,4 +118,5 @@ cython_debug/
 # Backup files
 *~
 .patch
-
+workspace/
+./workspace

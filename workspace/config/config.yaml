@@ -1,6 +1,0 @@
-{
-"action": "write_file",
-"path": "config/config.yaml",
-"content": "runtime:\n  cycles: 50\n  dry_run: true\n  seed: 42\n\nengine: llama.cpp  # fallback: gpt4all | auto\n\nllm:\n  engine_path: ./llama-cli # Path to the llama.cpp executable\n  gen_defaults: {temp: 0.6, top_p: 0.95, repeat_penalty: 1.1, max_tokens: 1024, ctx: 16384}\n  models:\n    neutral_a: {path: /home/sentinel/.var/app/io.gpt4all.gpt4all/data/nomic.ai/GPT4All/Meta-Llama-3.1-8B-Instruct-128k-Q4_0.gguf}\n    mooded_b:  {path: /home/sentinel/.var/app/io.gpt4all.gpt4all/data/nomic.ai/GPT4All/Meta-Llama-3.1-8B-Instruct-128k-Q4_0.gguf}\n    summarizer:{path: /home/sentinel/.var/app/io.gpt4all.gpt4all/data/nomic.ai/GPT4All/mistral-7b-instruct-v0.1.Q4_0.gguf}\n    coder:     {path: /home/sentinel/.var/app/io.gpt4all.gpt4all/data/nomic.ai/GPT4All/qwen2.5-coder-7b-instruct-q4_0.gguf}\n    assistant: {path: /home/sentinel/models/Llama-3.2-3B-Instruct.gguf} # New assistant model\n\npersona:\n  current: Analytical\n  dir: ./personas\n\nprompts:\n  dir: ./prompts\n\nmemory:\n  faiss_path: ./data/vectors.faiss\n  sqlite_path: ./data/meta.sqlite3\n  recall:\n    k: 8\n    alpha: 0.7\n\nsafety:\n  allowlist_tools: []\n  veto_risk: 0.6\n"
-}
-
