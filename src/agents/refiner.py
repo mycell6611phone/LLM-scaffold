@@ -35,9 +35,10 @@ class Refiner:
         plan: Plan = None,
         context: List[Dict[str, Any]] = None,
         budget_calls: int = 1,
+        objective: str = None,
     ):
-        # Objective comes from the step unless overridden
-        prompt = step.inputs.get("objective", step.description)
+        # Objective comes from explicit argument, then inputs, then description
+        prompt = objective or step.inputs.get("objective", step.description)
 
         # Plan: prefer explicit arg, fall back to step.inputs
         plan_payload = plan or step.inputs.get("plan_snapshot")

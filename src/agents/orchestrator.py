@@ -25,7 +25,7 @@ class Orchestrator:
         self.current_plan: Optional[Plan] = None
         self._discoveries: List[Dict[str, Any]] = []
         self._objective: Optional[str] = None
-        self.last_context: List[Dict[str, Any]] = []
+        self.last_context: list[dict] = []
 
     async def gather_requirements(self, objective: str, agents: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Consult supporting agents for quick requirement probes."""

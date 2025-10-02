@@ -80,7 +80,7 @@ async def main(prompt: str):
         orch.last_context.append(
             {"description": final_step.description, "agent": "refiner", "result": refined_output}
         )
-    sp.append({"type": "final", "result": refined_output})
+    orch_sp.append({"type": "final", "result": refined_output})
 
     # ─── persist & output ───────────────────────────────────────
 

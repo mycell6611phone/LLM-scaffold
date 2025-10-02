@@ -6,10 +6,21 @@ class Scratchpad:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
-    def append(self, obj: dict):
+    def append(self, obj):
+        # Handle Pydantic v2
+        if hasattr(obj, "model_dump"):
+            obj = obj.model_dump()
+        # Handle Pydantic v1
+        elif hasattr(obj, "dict"):
+            obj = obj.dict()
+        # Fallback: if it’s not a dict, wrap it
+        elif not isinstance(obj, (dict, list, str, int, float, bool, type(None))):
+            obj = {"value": str(obj)}
+
         line = json.dumps(obj, ensure_ascii=False)
         with self.path.open("a", encoding="utf-8") as f:
             f.write(line + "\n")
+
 
     def read_all(self):
         if not self.path.exists():
