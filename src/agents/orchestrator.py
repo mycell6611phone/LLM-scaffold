@@ -25,6 +25,7 @@ class Orchestrator:
         self.current_plan: Optional[Plan] = None
         self._discoveries: List[Dict[str, Any]] = []
         self._objective: Optional[str] = None
+        self.last_context: List[Dict[str, Any]] = []
 
     async def gather_requirements(self, objective: str, agents: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Consult supporting agents for quick requirement probes."""
@@ -281,6 +282,7 @@ class Orchestrator:
             if agent_key == "refiner" or "final" in step.description.lower():
                 break
 
+        self.last_context = context
         executed_plan = Plan(steps=executed_steps)
         self.current_plan = executed_plan
         return executed_plan
