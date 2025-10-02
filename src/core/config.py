@@ -11,6 +11,7 @@ class Config(BaseModel):
     workdir: str = "./workspace"
 
     # optional per-agent overrides
+    model_plan_orchestrator: str | None = None
     model_orchestrator: str | None = None
     model_executor: str | None = None
     model_theorist: str | None = None
@@ -20,12 +21,13 @@ class Config(BaseModel):
     @classmethod
     def from_env(cls):
         return cls(
-            model=os.getenv("MODEL", "llama-3.1-8b-instruct"),
-            base_url=os.getenv("BASE_URL", "http://localhost:1234/v1"),
+            model=os.getenv("MODEL", "Llama 3.1 8B Instruct 128k"),
+            base_url=os.getenv("BASE_URL", "http://localhost:4891/v1"),
             api_key=os.getenv("API_KEY", "not-needed"),
-            max_tool_calls_per_step=int(os.getenv("MAX_TOOL_CALLS_PER_STEP", "6")),
-            max_step_tokens=int(os.getenv("MAX_STEP_TOKENS", "2048")),
+            max_tool_calls_per_step=int(os.getenv("MAX_TOOL_CALLS_PER_STEP", "3")),
+            max_step_tokens=int(os.getenv("MAX_STEP_TOKENS", "1048")),
             workdir=os.getenv("WORKDIR", "./workspace"),
+            model_plan_orchestrator=os.getenv("MODEL_PLAN_ORCHESTRATOR"),
             model_orchestrator=os.getenv("MODEL_ORCHESTRATOR"),
             model_executor=os.getenv("MODEL_EXECUTOR"),
             model_theorist=os.getenv("MODEL_THEORIST"),
